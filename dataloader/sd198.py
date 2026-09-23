@@ -40,8 +40,6 @@ class SD198(Dataset):
         self.label = label
         self.num_class = len(set(label))
 
-        # Transformation
-
         input_size = 224
         if getattr(args, "model", None) == "medical_vit":
             normalize_mean = [0.48145466, 0.4578275, 0.40821073]
@@ -56,11 +54,8 @@ class SD198(Dataset):
                 transforms.Resize(input_size, interpolation=interpolation),
                 transforms.CenterCrop(input_size),
                 transforms.RandomCrop(input_size, padding=4),
-                # transforms.Resize(336),
-                # transforms.RandomResizedCrop(input_size),
                 transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
                 transforms.RandomHorizontalFlip(),
-                #transforms.RandomVerticalFlip(),
                 transforms.RandomRotation(180),
                 transforms.ToTensor(),
                 transforms.Normalize(normalize_mean, normalize_std)

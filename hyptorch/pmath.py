@@ -12,7 +12,6 @@ def tanh(x, clamp=15):
     return x.clamp(-clamp, clamp).tanh()
 
 
-# +
 class Artanh(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x):
@@ -43,9 +42,6 @@ class RiemannianGradient(torch.autograd.Function):
 
         scale = (1 - RiemannianGradient.c * x.pow(2).sum(-1, keepdim=True)).pow(2) / 4
         return grad_output * scale
-
-
-# -
 
 
 class Arsinh(torch.autograd.Function):
@@ -101,7 +97,6 @@ def _project(x, c):
     cond = norm > maxnorm
     projected = x / norm * maxnorm
     return torch.where(cond, projected, x)
-    # where函数，依照cond的规则，合并projected和x，若norm>maxnorm，对应位置取norm中的值
 
 
 def lambda_x(x, *, c=1.0, keepdim=False):
@@ -170,7 +165,6 @@ def mobius_add(x, y, *, c=1.0):
 
 
 def _mobius_add(x, y, c):
-    # 文中公式6
     x2 = x.pow(2).sum(dim=-1, keepdim=True)
     y2 = y.pow(2).sum(dim=-1, keepdim=True)
     xy = (x * y).sum(dim=-1, keepdim=True)
@@ -205,7 +199,6 @@ def dist(x, y, *, c=1.0, keepdim=False):
 
 
 def _dist(x, y, c, keepdim: bool = False):
-    # 文中公式7
     sqrt_c = c ** 0.5
     dist_c = artanh(sqrt_c * _mobius_add(-x, y, c).norm(dim=-1, p=2, keepdim=keepdim))
     return dist_c * 2 / sqrt_c
@@ -269,7 +262,6 @@ def expmap(x, u, *, c=1.0):
 
 
 def _expmap(x, u, c):  # pragma: no cover
-    # 文中公式8
     sqrt_c = c ** 0.5
     u_norm = torch.clamp_min(u.norm(dim=-1, p=2, keepdim=True), 1e-5)
     second_term = (
@@ -302,12 +294,8 @@ def expmap0(u, *, c=1.0):
 
 
 def _expmap0(u, c):
-    # 文中公式8，部分
     sqrt_c = c ** 0.5
     u_norm = torch.clamp_min(u.norm(dim=-1, p=2, keepdim=True), 1e-5)
-    # norm:p:指定的范数; dim:指定在哪个维度进行，如果不指定，则是在所有维度进行计算;
-    # keepdim:True or False，如果True，则保留dim指定的维度，False则不保留
-    # torch.clamp_min_方法设置一个下限min，tensor中有元素小于这个值, 就把对应的值赋为min
     gamma_1 = tanh(sqrt_c * u_norm) * u / (sqrt_c * u_norm)
     return gamma_1
 
@@ -340,7 +328,6 @@ def logmap(x, y, *, c=1.0):
 
 
 def _logmap(x, y, c):  # pragma: no cover
-    # 文中公式9
     sub = _mobius_add(-x, y, c)
     sub_norm = sub.norm(dim=-1, p=2, keepdim=True)
     lam = _lambda_x(x, c, keepdim=True)
@@ -372,7 +359,6 @@ def logmap0(y, *, c=1.0):
 
 
 def _logmap0(y, c):
-    # 文中公式9，部分
     sqrt_c = c ** 0.5
     y_norm = torch.clamp_min(y.norm(dim=-1, p=2, keepdim=True), 1e-5)
     return y / y_norm / sqrt_c * artanh(sqrt_c * y_norm)
@@ -403,7 +389,6 @@ def mobius_matvec(m, x, *, c=1.0):
 
 
 def _mobius_matvec(m, x, c):
-    # 文中公式13
     x_norm = torch.clamp_min(x.norm(dim=-1, keepdim=True, p=2), 1e-5)
     sqrt_c = c ** 0.5
     mx = x @ m.transpose(-1, -2)
@@ -421,7 +406,6 @@ def _tensor_dot(x, y):
 
 
 def _mobius_addition_batch(x, y, c):
-    # 文中公式6，批量
     xy = _tensor_dot(x, y)  # B x C
     x2 = x.pow(2).sum(-1, keepdim=True)  # B x 1
     y2 = y.pow(2).sum(-1, keepdim=True)  # C x 1
@@ -436,7 +420,6 @@ def _mobius_addition_batch(x, y, c):
 
 
 def _hyperbolic_softmax(X, A, P, c):
-    # 文中公式15
     lambda_pkc = 2 / (1 - c * P.pow(2).sum(dim=1))
     k = lambda_pkc * torch.norm(A, dim=1) / torch.sqrt(c)
     mob_add = _mobius_addition_batch(-P, X, c)
@@ -447,13 +430,11 @@ def _hyperbolic_softmax(X, A, P, c):
 
 
 def p2k(x, c):
-    # 公式12，poincare模型映射到Klein模型
     denom = 1 + c * x.pow(2).sum(-1, keepdim=True)
     return 2 * x / denom
 
 
 def k2p(x, c):
-    # 公式11，Klein模型映射到poincare模型
     denom = 1 + torch.sqrt(1 - c * x.pow(2).sum(-1, keepdim=True))
     return x / denom
 
@@ -481,11 +462,8 @@ def lorenz_factor(x, *, c=1.0, dim=-1, keepdim=False):
 
 
 def poincare_mean(x, dim=0, c=1.0):
-    # poincare_mean是hyptorch\pmath中的函数，给定poincare球中的点，先将它们映射到Klein模型，使用公式10计算平均值
-    # 然后将其移回poincare模型，以计算proto在poincare模型的均值
     x = p2k(x, c)
     lamb = lorenz_factor(x, c=c, keepdim=True)
-    # 公式10
     mean = torch.sum(lamb * x, dim=dim, keepdim=True) / torch.sum(
         lamb, dim=dim, keepdim=True)
     mean = k2p(mean, c)
@@ -493,12 +471,9 @@ def poincare_mean(x, dim=0, c=1.0):
     return mean.squeeze(dim)
 
 def poincare_mean0(x, dim=0, c=1.0):
-    # poincare_mean是hyptorch\pmath中的函数，给定poincare球中的点，先将它们映射到Klein模型，使用公式10计算平均值
-    # 然后将其移回poincare模型，以计算proto在poincare模型的均值
     x = p2k(x, c)
     lamb = lorenz_factor(x, c=c, keepdim=True)
     zero1 = torch.ones_like(lamb)
-    # 公式10
     mean = torch.sum(zero1*x, dim=dim, keepdim=True) / torch.sum(
         zero1, dim=dim, keepdim=True)
     mean = k2p(mean, c)
@@ -506,11 +481,8 @@ def poincare_mean0(x, dim=0, c=1.0):
     return mean.squeeze(dim)
 
 def poincare_pt_mean(x, dim=0, c=1.0):
-    # poincare_mean是hyptorch\pmath中的函数，给定poincare球中的点，先将它们映射到Klein模型，使用公式10计算平均值
-    # 然后将其移回poincare模型，以计算proto在poincare模型的均值
     x = p2k(x, c)
     lamb = lorenz_factor(x, c=c, keepdim=True)
-    # 公式10
     mean = torch.sum(lamb * x, dim=dim, keepdim=True) / torch.sum(
         lamb, dim=dim, keepdim=True
     )
@@ -528,7 +500,6 @@ def _dist_matrix(x, y, c):
 
 def _zero_dist_matrix(x, c):
     sqrt_c = c ** 0.5
-    #return torch.norm(x)
     return (
         2
         / sqrt_c

@@ -56,8 +56,8 @@ class DropBlock(nn.Module):
                 torch.arange(self.block_size)
                 .view(-1, 1)
                 .expand(self.block_size, self.block_size)
-                .reshape(-1),  # - left_padding,
-                torch.arange(self.block_size).repeat(self.block_size),  # - left_padding
+                .reshape(-1),
+                torch.arange(self.block_size).repeat(self.block_size),
             ]
         ).t()
         offsets = torch.cat(
@@ -72,7 +72,6 @@ class DropBlock(nn.Module):
             offsets = offsets.long()
 
             block_idxs = non_zero_idxs + offsets
-            # block_idxs += left_padding
             padded_mask = F.pad(
                 mask, (left_padding, right_padding, left_padding, right_padding)
             )
@@ -84,7 +83,7 @@ class DropBlock(nn.Module):
                 mask, (left_padding, right_padding, left_padding, right_padding)
             )
 
-        block_mask = 1 - padded_mask  # [:height, :width]
+        block_mask = 1 - padded_mask
         return block_mask
 
 

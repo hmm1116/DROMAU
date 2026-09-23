@@ -1,12 +1,7 @@
-# coding=utf-8
-
 import argparse
 import os.path as osp
-import os
-import numpy as np
 import torch
 import torch.nn.functional as F
-import torch.nn as nn
 from torch.func import functional_call
 from dataloader.samplers import CategoriesSampler
 from models.protonet import ProtoNet
@@ -34,9 +29,7 @@ from utils import (
     Averager,
     Timer,
     count_acc,
-    compute_confidence_interval,
 )
-import random
 from hyptorch.pmath import dist_matrix
 
 if __name__ == "__main__":
@@ -49,7 +42,7 @@ if __name__ == "__main__":
             logits_ori = -1 * torch.cdist(feature_query, train_prototypes)
         mask = torch.eq(label_query.contiguous().view(-1, 1), centroid_classes.contiguous().view(-1, 1).T).cuda()
         mask_false = ~mask
-        # 先把标签变为one-hot再取反，本来是300维，变成300*20，然后再变成20*300
+        # Build a complementary one-hot mask for all non-target classes.
         ones = torch.sparse.torch.eye(way).cuda()
         lable_onehot = ones.index_select(0, label_query)
         label_false = ~(lable_onehot.bool())
@@ -59,33 +52,10 @@ if __name__ == "__main__":
         logits_ori[mask] = logits_ori[mask] - epsilons[label_query].cuda()
         epsilons_new = epsilons.contiguous().view(1, -1).repeat(label_query.shape[0], 1)
         logits_ori[mask_false] = a[mask_false] + epsilons_new[label_false].cuda()
-        # loss = F.cross_entropy(logits, label_query)
 
         logits_label2 = logits_label2 - epsilons.contiguous().view(1, -1).repeat(label_query.shape[0], 1).cuda()
 
         return logits_label1, logits_label2, logits_ori,
-
-
-    # 定义CE Loss和L2正则化
-    def ce_loss_with_l2_regularization(logits, targets, X, lambda_reg=0.01):
-        """
-        logits: 模型输出的预测
-        targets: 实际目标
-        model: 当前模型
-        X: 超参组，每个类别有一个超参
-        lambda_reg: 正则化系数
-        """
-        # 计算交叉熵损失
-        ce_loss = nn.CrossEntropyLoss()(logits, targets)
-
-        # 计算每个类别的L2正则化损失
-        l2_reg_loss = 0
-        for i in range(len(X)):  # 对每个类别的超参X进行正则化
-            l2_reg_loss += torch.norm(X[i], p=2) ** 2
-
-        # 加入正则化项
-        total_loss = ce_loss - lambda_reg * l2_reg_loss
-        return total_loss
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--max_epoch", type=int, default=200)
@@ -145,7 +115,6 @@ if __name__ == "__main__":
 
     if torch.cuda.is_available():
         print("CUDA IS AVAILABLE")
-        #set_gpu(args.gpu)
 
     medical_sdp_state = None
     if args.model == "medical_vit" and torch.cuda.is_available():
@@ -233,27 +202,22 @@ if __name__ == "__main__":
         out_features=1,
     ).cuda()
 
-    # print(model)
     optimizer = torch.optim.Adam(
         (parameter for parameter in model.parameters() if parameter.requires_grad),
         lr=args.lr,
     )
     optimizer_mlp = torch.optim.Adam(mlp.parameters(), lr=args.mlp_lr)
-    # optimizer_mlp = torch.optim.SGD(mlp.parameters(), lr=1e-2)
-    # optimizer_mlp = torch.optim.Adam(mlp.parameters(), 1e-3, weight_decay=1e-4)
 
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=args.max_epoch
     )
 
-        # load pre-trained model (no FC weights)
+    # Load pretrained encoder weights without a classifier head.
     model_dict = model.state_dict()
     if args.init_weights is not None:
         pretrained_dict = torch.load(args.init_weights)["params"]
-        # remove weights for FC
         pretrained_dict = {"encoder." + k: v for k, v in pretrained_dict.items()}
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        print(pretrained_dict.keys())
         model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
 
@@ -261,7 +225,6 @@ if __name__ == "__main__":
         if torch.backends.cudnn.enabled:
             torch.backends.cudnn.benchmark = True
         model = model.cuda()
-    # model = nn.DataParallel(model)
 
     if args.model == "medical_vit":
         trainable_params = sum(
@@ -331,13 +294,10 @@ if __name__ == "__main__":
         vl = Averager()
         va0 = Averager()
         va1 = Averager()
-        # eps = Averager()
         for i, batch in enumerate(train_loader, 1):
             data, _ = [_.cuda() for _ in batch]
-            # print(data.shape)
             p = args.shot * args.way
             data_shot, data_query = data[:p], data[p:]
-            #print(data_shot.shape, data_query.shape, "data_shot, data_query")
             label_shot = torch.arange(args.way).repeat(args.shot)
             label_shot = label_shot.type(torch.cuda.LongTensor)
             label_query = torch.arange(args.way).repeat(args.query)
@@ -356,22 +316,16 @@ if __name__ == "__main__":
                 torch.backends.cuda.enable_mem_efficient_sdp(False)
                 torch.backends.cuda.enable_math_sdp(True)
 
-            feature_shot, feature_query, shot2zero = meta_model(data_shot, data_query)
-            #print(feature_shot.shape, feature_query.shape, "feature_shot, feature_query")
+            feature_shot, feature_query, _ = meta_model(data_shot, data_query)
 
             centroid_classes = torch.unique(label_shot)
-            classes, positive_counts = torch.unique(label_query, return_counts=True)
             train_prototypes = torch.stack(
                 [feature_shot[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
-            #shot2zero = torch.stack([shot2zero[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
             support_data = [feature_shot[torch.where(label_shot == c)] for c in centroid_classes]
-            #print(support_data[0].shape, "support_data[0].shape")
             if args.shot > 1:
                 support_data = torch.cat([t.view(-1) for t in support_data], dim=0).view(args.way, -1)
             else:
                 support_data = torch.cat(support_data, dim=0)
-            #print(support_data.shape, "support_data")
-            #exit()
             epsilons = mlp(support_data).squeeze()
             epsilons0 = torch.ones(args.way).cuda()
             epsilons0 = epsilons0 * args.epsilons_ratio
@@ -380,8 +334,6 @@ if __name__ == "__main__":
                 logits_label(feature_query, train_prototypes, label_query, centroid_classes, epsilons, args.way)
 
             loss = F.cross_entropy(logits_ori, label_query)
-            # loss = ce_loss_with_l2_regularization(logits_ori, label_query, epsilons)
-            # loss = F.cross_entropy(logits_label2, label_query)
             meta_model.zero_grad(set_to_none=True)
             if args.model == "medical_vit":
                 named_trainable_params = [
@@ -409,77 +361,22 @@ if __name__ == "__main__":
             label_shot_meta = torch.arange(args.validation_way).repeat(args.shot).type(torch.cuda.LongTensor)
             label_query_meta = torch.arange(args.validation_way).repeat(args.query).type(torch.cuda.LongTensor)
             centroid_classes_meta = torch.unique(label_shot_meta)
-            # try:
-            #     data_meta, _ = next(train_meta_loader_iter)
-            # except StopIteration:
-            #     train_meta_loader_iter = iter(val_loader)
-            #     data_meta, _ = next(train_meta_loader_iter)
-            # data_meta = data_meta.cuda()
-            # data_shot_meta, data_query_meta = data_meta[:p], data_meta[p:]
-            # feature_shot_meta, feature_query_meta, shot2zero = model(data_shot_meta, data_query_meta)
-            # 存储每个迭代的shot2zero值和相关特征
-            # shot2zero_values = []
-            features_shot_meta_list = []
-            features_query_meta_list = []
-            data_shot_meta_list = []
-            data_query_meta_list = []
-
-            # 变量存储当前最佳的均值/方差及其对应的索引
-            shot2zero_sampler_num = 1  # 最多保留的均值/方差个数 5
-            best_shot2zero_idx = None
-            best_metric = None  # 用于存储最佳的均值/方差
-            # 一次获取5个迭代数据
-            with torch.no_grad():
-                if shot2zero_sampler_num > 1:
-                    for i in range(5):  # 5
-                        try:
-                            data_meta, _ = next(train_meta_loader_iter)
-                        except StopIteration:
-                            train_meta_loader_iter = iter(val_loader)
-                            data_meta, _ = next(train_meta_loader_iter)
-                        data_meta = data_meta.cuda()
-                        data_shot_meta, data_query_meta = data_meta[:p], data_meta[p:]
-                        data_shot_meta_list.append(data_shot_meta)
-                        data_query_meta_list.append(data_query_meta)
-                        # 获取模型的特征和shot2zero
-                        feature_shot_meta, feature_query_meta, shot2zero = model(data_shot_meta, data_query_meta)
-                        features_shot_meta_list.append(feature_shot_meta)
-                        features_query_meta_list.append(feature_query_meta)
-                        # 将当前的shot2zero值以及特征添加到列表中
-                        shot2zero = torch.stack(
-                            [shot2zero[torch.where(label_shot_meta == c)[0]].mean(0) for c in centroid_classes_meta])
-                        # 计算shot2zero的均值或方差
-                        shot2zero_mean = shot2zero.mean().item()  # 或者计算方差：shot2zero.var().item()
-                        # shot2zero_mean = shot2zero.var().item()
-                        # 如果是第一次迭代，初始化best_metric
-                        if best_metric is None:
-                            best_metric = shot2zero_mean
-                            best_shot2zero_idx = 0
-                        else:
-                            # 更新最佳均值（或方差）对应的索引
-                            if shot2zero_mean < best_metric:  # 均值最大时更新
-                                best_metric = shot2zero_mean
-                                best_shot2zero_idx = i  # 更新为当前的迭代索引
-                    data_shot_meta = data_shot_meta_list[best_shot2zero_idx]
-                    data_query_meta = data_query_meta_list[best_shot2zero_idx]
-
-                else:
-                    try:
-                        data_meta, _ = next(train_meta_loader_iter)
-                    except StopIteration:
-                        train_meta_loader_iter = iter(val_loader)
-                        data_meta, _ = next(train_meta_loader_iter)
-                    data_meta = data_meta.cuda()
-                    data_shot_meta, data_query_meta = data_meta[:p], data_meta[p:]
+            try:
+                data_meta, _ = next(train_meta_loader_iter)
+            except StopIteration:
+                train_meta_loader_iter = iter(val_loader)
+                data_meta, _ = next(train_meta_loader_iter)
+            data_meta = data_meta.cuda()
+            data_shot_meta, data_query_meta = data_meta[:p], data_meta[p:]
 
             if args.model == "medical_vit":
-                feature_shot_meta, feature_query_meta, shot2zero = functional_call(
+                feature_shot_meta, feature_query_meta, _ = functional_call(
                     meta_model,
                     virtual_params,
                     (data_shot_meta, data_query_meta),
                 )
             else:
-                feature_shot_meta, feature_query_meta, shot2zero = meta_model(
+                feature_shot_meta, feature_query_meta, _ = meta_model(
                     data_shot_meta, data_query_meta
                 )
 
@@ -490,12 +387,8 @@ if __name__ == "__main__":
                         -dist_matrix(feature_query_meta, train_prototypes_meta, c=args.c) / args.temperature)
             else:
                 logits_ori_meta = -1 * torch.cdist(feature_query_meta, train_prototypes_meta)
-            # logits_ori_meta = (
-            #         -dist_matrix(feature_query_meta, train_prototypes_meta, c=args.c) / args.temperature)
             loss_val = F.cross_entropy(logits_ori_meta, label_query_meta)
-            # loss_val = F.cross_entropy(logits_label2_meta, label_query_meta)
             acc_meta = count_acc(logits_ori_meta, label_query_meta)
-            # acc_meta = count_acc(logits_label2_meta, label_query_meta)
 
             optimizer_mlp.zero_grad(set_to_none=True)
             loss_val.backward()
@@ -503,14 +396,6 @@ if __name__ == "__main__":
                 torch.backends.cuda.enable_flash_sdp(medical_sdp_state[0])
                 torch.backends.cuda.enable_mem_efficient_sdp(medical_sdp_state[1])
                 torch.backends.cuda.enable_math_sdp(medical_sdp_state[2])
-            if args.model == "medical_vit" and epoch == 1 and i == 1:
-                mlp_grad_sq = sum(
-                    parameter.grad.detach().float().pow(2).sum()
-                    for parameter in mlp.parameters()
-                    if parameter.grad is not None
-                )
-                mlp_grad_norm = mlp_grad_sq.sqrt().item() if not isinstance(mlp_grad_sq, int) else 0.0
-                print("MR-Net meta-gradient norm: {:.6e}".format(mlp_grad_norm))
             optimizer_mlp.step()
             optimizer_mlp.zero_grad(set_to_none=True)
 
@@ -523,12 +408,10 @@ if __name__ == "__main__":
             del loss, logits_ori, logits_label1, logits_label2
             del feature_shot, feature_query, train_prototypes, support_data, epsilons
 
-            feature_shot, feature_query, shot2zero = model(data_shot, data_query)
+            feature_shot, feature_query, _ = model(data_shot, data_query)
             centroid_classes = torch.unique(label_shot)
-            classes, positive_counts = torch.unique(label_query, return_counts=True)
             train_prototypes = torch.stack(
                 [feature_shot[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
-            #shot2zero = torch.stack([shot2zero[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
             support_data = [feature_shot[torch.where(label_shot == c)] for c in centroid_classes]
             if args.shot > 1:
                 support_data = torch.cat([t.view(-1) for t in support_data], dim=0).view(args.way, -1)
@@ -544,21 +427,14 @@ if __name__ == "__main__":
                 logits_label(feature_query, train_prototypes, label_query, centroid_classes, epsilons, args.way)
 
             loss = F.cross_entropy(logits_ori, label_query)
-            # loss = F.cross_entropy(logits_label2, label_query)
 
             acc1 = count_acc(logits_label1, label_query)
-            #acc1 = count_acc(logits, label_query)
             acc2 = count_acc(logits_label2, label_query)
-            '''print('epoch {}, train {}/{}, loss={:.4f} acc1={:.4f}'
-                  .format(epoch, i, len(train_loader), loss.item(), acc1))
-            print('epoch {}, train {}/{}, loss={:.4f} acc2={:.4f}'
-                  .format(epoch, i, len(train_loader), loss.item(), acc2))'''
 
             tl.add(loss.item())
             ta0.add(acc1)
             ta1.add(acc2)
             tam.add(acc_meta)
-            # eps.add(epsilons.item())
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -572,23 +448,17 @@ if __name__ == "__main__":
             )
         )
         epsilons_val = Averager()
-        epsilons_ratio_val = Averager()
-        shot = Averager()
-        shot_ratio = Averager()
         with torch.no_grad():
             for i, batch in enumerate(val_loader, 1):
                 data, _ = [_.cuda() for _ in batch]
-                # print(data.shape)
                 p = args.shot * args.validation_way
                 data_shot, data_query = data[:p], data[p:]
                 label_shot = torch.arange(args.validation_way).repeat(args.shot).type(torch.cuda.LongTensor)
                 label_query = torch.arange(args.validation_way).repeat(args.query).type(torch.cuda.LongTensor)
-                feature_shot, feature_query, shot2zero = model(data_shot, data_query)
+                feature_shot, feature_query, _ = model(data_shot, data_query)
                 centroid_classes = torch.unique(label_shot)
-                classes, positive_counts = torch.unique(label_query, return_counts=True)
                 train_prototypes = torch.stack(
                     [feature_shot[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
-                #shot2zero = torch.stack([shot2zero[torch.where(label_shot == c)[0]].mean(0) for c in centroid_classes])
                 support_data = [feature_shot[torch.where(label_shot == c)] for c in centroid_classes]
                 if args.shot > 1:
                     support_data = torch.cat([t.view(-1) for t in support_data], dim=0).view(args.validation_way, -1)
@@ -596,21 +466,15 @@ if __name__ == "__main__":
                     support_data = torch.cat(support_data, dim=0)
                 epsilons = mlp(support_data).squeeze()
                 epsilons_val.add(epsilons.mean().item())
-                #shot.add(shot2zero.mean().item())
-                #shot_ratio.add(torch.sqrt(torch.sum((shot2zero[0] - shot2zero[1]) ** 2)))
-                #epsilons_ratio_val.add(shot2zero.mean().item())
-                #epsilons_ratio_val.add(args.epsilons_ratio)
                 epsilons0 = torch.ones(args.validation_way).cuda()
                 epsilons0 = epsilons0 * args.epsilons_ratio
                 epsilons = epsilons + epsilons0
-                #print(epsilons, "epsilons_val")
                 logits_label1, logits_label2, logits_ori = \
                     logits_label(feature_query, train_prototypes, label_query, centroid_classes, epsilons, args.validation_way)
 
                 loss = F.cross_entropy(logits_ori, label_query)
 
                 acc1 = count_acc(logits_label1, label_query)
-                #acc1 = count_acc(logits, label_query)
                 acc2 = count_acc(logits_label2, label_query)
 
                 vl.add(loss.item())
@@ -626,16 +490,12 @@ if __name__ == "__main__":
         va0 = va0.item()
         va1 = va1.item()
         epsilons_val = epsilons_val.item()
-        epsilons_ratio_val = epsilons_ratio_val.item()
-        shot = shot.item()
-        shot_ratio = shot_ratio.item()
         writer.add_scalar("data/val_loss", float(vl), epoch)
         writer.add_scalar("data/val_acc0", float(va0), epoch)
         writer.add_scalar("data/val_acc1", float(va1), epoch)
         print("epoch {}, train, loss={:.4f} acc0={:.4f} acc1={:.4f} acc_meta={:.4f}".format(epoch, tl, ta0, ta1, tam))
         print("epoch {}, val, loss={:.4f} acc0={:.4f} acc1={:.4f}".format(epoch, vl, va0, va1))
-        print("epsilons&epsilon_ratio:", epsilons_val, epsilons_ratio_val)
-        print("shot&shot_ratio:", shot, shot_ratio)
+        print("epsilon_mean:", epsilons_val)
         with open(path, 'a', newline='', encoding='utf-8') as csvFile:
             writer_epsilons = csv.writer(csvFile)
             writer_epsilons.writerow([epsilons_val])

@@ -73,11 +73,8 @@ class ISIC(Dataset):
                 transforms.Resize(input_size, interpolation=interpolation),
                 transforms.CenterCrop(input_size),
                 transforms.RandomCrop(input_size, padding=4),
-                # transforms.Resize(336),
-                # transforms.RandomResizedCrop(input_size),
                 transforms.RandomAffine(degrees=0, translate=(0.2, 0.2)),
                 transforms.RandomHorizontalFlip(),
-                #transforms.RandomVerticalFlip(),
                 transforms.RandomRotation(90),
                 transforms.ToTensor(),
                 transforms.Normalize(normalize_mean, normalize_std)

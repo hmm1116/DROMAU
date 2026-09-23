@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-#trainset.label, 100, args.way, args.shot + args.query
+
 class CategoriesSampler:
     def __init__(self, label, n_batch, n_cls, n_per):
         self.n_batch = n_batch

@@ -3,7 +3,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from hyptorch.nn import HypLinear, ToPoincare
+from hyptorch.nn import HypLinear
 
 __all__ = ["densenet121", "densenet169", "densenet201", "densenet161"]
 
@@ -104,7 +104,6 @@ class DenseNet(nn.Module):
 
         super(DenseNet, self).__init__()
 
-        # First convolution
         self.features = nn.Sequential(
             OrderedDict(
                 [
@@ -123,7 +122,6 @@ class DenseNet(nn.Module):
             )
         )
 
-        # Each denseblock
         num_features = num_init_features
         for i, num_layers in enumerate(block_config):
             block = _DenseBlock(
@@ -143,10 +141,8 @@ class DenseNet(nn.Module):
                 self.features.add_module("transition%d" % (i + 1), trans)
                 num_features = num_features // 2
 
-        # Final batch norm
         self.features.add_module("norm5", nn.BatchNorm2d(num_features))
 
-        # Linear layer
         if remove_linear:
             self.classifier = None
         else:
@@ -171,7 +167,6 @@ class DenseNet(nn.Module):
             features = module(features)
         out = F.relu(features, inplace=False)
         out = F.adaptive_max_pool2d(out, (1, 1)).view(features.size(0), -1)
-        #         out = F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0), -1)
         if self.classifier is None:
             if feature:
                 return out, None

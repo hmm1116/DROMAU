@@ -6,27 +6,6 @@ import torch.nn.init as init
 
 import hyptorch.pmath as pmath
 
-class WeightCroLoss(nn.Module):
-    def __int__(self, inputs, target, weight=None):
-        super(WeightCroLoss, self).__int__()
-        self.inputs = inputs
-        self.target = target
-        self.weight = weight
-
-    def forward(self):
-        # weight_new = torch.zeros(size=(inputs.shape[0], inputs.shape[1]), device="cuda:0") # [batch_size, class_num]
-        # weight_new = weight_new.copy_(weight) # [batch_size, class_num], weight按行复制batch_size个
-        log = F.log_softmax(self.inputs, dim=1)  # [batch_size, class_num]
-        print("weight_new", self.weight)
-        print("log", log)
-        log = log * self.weight  # [batch_size, class_num]
-
-        target = self.target.reshape(-1, 1)  # [batch_size, 1]
-        log = log.gather(1, target)  # [batch_size, 1]
-        result = -1 * log
-        result = result.mean()  # [1]
-
-        return result
 
 class HyperbolicMLR(nn.Module):
     r"""
@@ -101,7 +80,6 @@ class HypLinear(nn.Module):
 
 
 class ConcatPoincareLayer(nn.Module):
-    # 文中公式14
     def __init__(self, d1, d2, d_out, c):
         super(ConcatPoincareLayer, self).__init__()
         self.d1 = d1
@@ -162,7 +140,6 @@ class ToPoincare(nn.Module):
         self.train_x = train_x
 
         self.riemannian = pmath.RiemannianGradient
-        #line 30
         self.riemannian.c = c
 
         if riemannian:
@@ -175,19 +152,6 @@ class ToPoincare(nn.Module):
         if self.train_x:
             xp = pmath.project(pmath.expmap0(self.xp, c=self.c), c=self.c)
             return self.grad_fix(pmath.project(pmath.expmap(xp, x, c=self.c), c=self.c))
-            #pmath line76 & 237
-        '''print("x", torch.norm(x[0]))
-        print("data_query0--shape", x.shape)
-        # print("data_query0", data_query)
-        print("pmath.expmap0", torch.norm(pmath.expmap0(x, c=self.c)[0]))
-        print("data_query0--shape", pmath.expmap0(x, c=self.c).shape)
-        # print("data_query0", data_query)
-        print("pmath.project", torch.norm(pmath.project(pmath.expmap0(x, c=self.c))[0]))
-        print("data_query0--shape", pmath.project(pmath.expmap0(x, c=self.c)).shape)
-        # print("data_query0", data_query)
-        print("pmath.grad_fix", torch.norm(self.grad_fix(pmath.project(pmath.expmap0(x, c=self.c), c=self.c))[0]))
-        print("data_query0--shape", self.grad_fix(pmath.project(pmath.expmap0(x, c=self.c), c=self.c)).shape)
-        # print("data_query0", data_query)'''
         return self.grad_fix(pmath.project(pmath.expmap0(x, c=self.c), c=self.c))
 
     def extra_repr(self):
