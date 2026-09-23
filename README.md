@@ -14,7 +14,7 @@ multi-seed evaluation with ACC and AUC.
 | SD-198 | 5 | 4 | 2 | 2 |
 | RFMiD | 5 | 5 | 2 | 1 |
 
-Supported backbones are `resnet12`, `resnet50`, and `densenet121`.
+Supported backbones are `resnet12`, `resnet50`, `densenet121`, and `ViT-B/16`.
 
 ## Repository layout
 
@@ -29,8 +29,7 @@ Supported backbones are `resnet12`, `resnet50`, and `densenet121`.
 |-- models/                  # ProtoNet/DROMAU model wrapper
 |-- networks/                # supported backbones and MR-Net MLP
 |-- hyptorch/                # Poincare-ball operations
-|-- data/                    # split files only; no medical images
-└-- docs/GITHUB_RELEASE_CN.md
+└-- data/                    # no medical images
 ```
 
 ## Environment
@@ -73,9 +72,6 @@ export ISIC_IMAGE_PATH=/path/to/ISIC_2019_Training_Input
 export SD198_IMAGE_PATH=/path/to/SD-198/images
 export RFMID_IMAGE_PATH=/path/to/RFMiD
 ```
-
-ISIC and RFMiD split CSVs are included. Add the verified SD-198 `train.csv`
-and `test.csv` files to `data/SD198/split` before running SD-198.
 
 ## Training and evaluation
 
@@ -139,20 +135,20 @@ Each run directory contains:
 Aggregated rows are appended to `results/<dataset>_results.csv` and
 `results/<dataset>_summary.csv`.
 
-## Reproducibility notes
-
-- Keep train way and validation/test way consistent with the table above.
-- Do not commit datasets, checkpoints, patient information, or local absolute
-  paths.
-- The exact SD-198 release split must be added before claiming reproduction of
-  the reported SD-198 numbers.
 
 ## Citation
 
-Please add the final paper citation here after publication.
+If you find this repository useful in your research, please cite the
+corresponding paper. The BibTeX entry will be added here once the final
+bibliographic information becomes available.
 
 ## License
 
-The project is released under the MIT License. Before making the repository
-public, verify that all retained third-party code and dataset split files may
-be redistributed under their original terms.
+The original source code in this repository is released under the
+[MIT License](LICENSE).
+
+This license applies only to code authored for this project. Third-party
+libraries and any files carrying their own license notices remain subject to
+their respective terms. Datasets and pretrained model weights are not covered
+by this license and must be obtained from their official sources in accordance
+with the corresponding licenses and terms of use.
