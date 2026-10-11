@@ -56,9 +56,7 @@ class ProtoNet(nn.Module):
             data_query = self.encoder(data_query)
         shot_zero = None
         if self.args.hyperbolic:
-            proto = 5e-2 * proto
             proto = self.e2p(proto)
-            data_query = 5e-2 * data_query
             data_query = self.e2p(data_query)
             shot_zero = (
                     zero_dist_matrix(proto, c=self.e2p.c) / self.args.temperature
@@ -98,7 +96,6 @@ class ProtoNet(nn.Module):
                 yield name, p
 
     def update_params(self, lr_inner, first_order=False, source_params=None, detach=False):
-        source_params = nn.ParameterList(source_params)
         if source_params is not None:
             trainable_params = (
                 item for item in self.named_params(self) if item[1].requires_grad
@@ -126,9 +123,6 @@ class ProtoNet(nn.Module):
                     self.set_param(self, name, param)
 
     def set_param(self, curr_mod, name, param):
-        if isinstance(param, torch.Tensor):
-            param = torch.nn.Parameter(param)
-
         if '.' in name:
             n = name.split('.')
             module_name = n[0]
@@ -138,7 +132,10 @@ class ProtoNet(nn.Module):
                     self.set_param(mod, rest, param)
                     break
         else:
-            setattr(curr_mod, name, param)
+            if name in curr_mod._parameters:
+                curr_mod._parameters[name] = param
+            else:
+                setattr(curr_mod, name, param)
 
     def detach_params(self):
         for name, param in self.named_params(self):

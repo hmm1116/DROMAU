@@ -75,6 +75,7 @@ class ISIC(Dataset):
                 transforms.RandomCrop(input_size, padding=4),
                 transforms.RandomAffine(degrees=0, translate=(0.2, 0.2)),
                 transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
                 transforms.RandomRotation(90),
                 transforms.ToTensor(),
                 transforms.Normalize(normalize_mean, normalize_std)

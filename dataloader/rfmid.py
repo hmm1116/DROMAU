@@ -47,10 +47,9 @@ def _image_candidates(root, source, image_id):
 
 class RFMiD(Dataset):
     def __init__(self, setname, args):
-        split_name = "fsl_train.csv" if setname == "train" else "fsl_test.csv"
         split_path = getattr(args, "rfmid_split_path", None)
         split_path = split_path or os.environ.get("RFMID_SPLIT_PATH") or SPLIT_PATH
-        csv_path = osp.join(split_path, split_name)
+        csv_path = osp.join(split_path, setname + ".csv")
         rows = _read_split(csv_path)
 
         image_root = getattr(args, "rfmid_image_path", None)
@@ -60,18 +59,16 @@ class RFMiD(Dataset):
 
         data = []
         label = []
-        lb = -1
         self.wnids = []
 
         for source, image_id, wnid in rows:
             if wnid not in self.wnids:
                 self.wnids.append(wnid)
-                lb += 1
 
             candidates = list(_image_candidates(image_root, source, image_id))
             img_path = next((path for path in candidates if osp.exists(path)), candidates[0])
             data.append(img_path)
-            label.append(lb)
+            label.append(self.wnids.index(wnid))
 
         self.data = data
         self.label = label
@@ -93,6 +90,7 @@ class RFMiD(Dataset):
                 transforms.RandomCrop(input_size, padding=4),
                 transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
                 transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
                 transforms.RandomRotation(90),
                 transforms.ToTensor(),
                 transforms.Normalize(normalize_mean, normalize_std),

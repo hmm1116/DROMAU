@@ -8,11 +8,11 @@ multi-seed evaluation with ACC and AUC.
 
 ## Supported settings
 
-| Dataset | Train way | Validation/test way | 1-shot query | 5-shot query |
+| Dataset | Train/meta way | Validation/test way | 1-shot query | 5-shot query |
 | --- | ---: | ---: | ---: | ---: |
 | ISIC | 3 | 2 | 2 | 2 |
 | SD-198 | 5 | 4 | 2 | 2 |
-| RFMiD | 5 | 5 | 2 | 1 |
+| RFMiD | 5 | 5 | 1 | 1 |
 
 Supported backbones are `resnet12`, `resnet50`, `densenet121`, and `ViT-B/16`.
 
@@ -75,7 +75,7 @@ export RFMID_IMAGE_PATH=/path/to/RFMiD
 
 ## Training and evaluation
 
-The presets train one model and then evaluate checkpoint `epoch-last.pth`.
+The presets train one model and then evaluate checkpoint `max_acc.pth`.
 The documented options below can be overridden through environment variables.
 
 ```bash
@@ -93,7 +93,7 @@ To evaluate an existing checkpoint without retraining, set `SKIP_TRAIN=1`,
 `SAVE_PATH` to its run directory, and `CHECKPOINT` to its filename:
 
 ```bash
-SKIP_TRAIN=1 SAVE_PATH=/path/to/run CHECKPOINT=epoch-last.pth \
+SKIP_TRAIN=1 SAVE_PATH=/path/to/run CHECKPOINT=max_acc.pth \
 GPU=0 RFMID_IMAGE_PATH=/path/to/rfmid bash scripts/rfmid_5shot.sh
 ```
 
@@ -120,15 +120,16 @@ bash scripts/isic_5shot.sh
 | `C_LIST` | Poincare-ball curvature(s) |
 | `TEST_EPISODES` | Number of randomly sampled evaluation episodes |
 
-Training episodes and meta episodes are sampled independently from the same
-training split; the meta stream does not read test classes or test images.
 
 ## Outputs
 
 Each run directory contains:
 
-- `epoch-last.pth` and `max_acc.pth`: model checkpoints;
+- `epoch-last.pth` and `max_acc.pth`: feature-extractor and MR-Net checkpoints,
+  including the epoch, validation accuracies, and training arguments;
 - `trlog`: serialized training log;
+- `epsilons.csv`: one row per epoch with mean, minimum, and maximum radii for
+  training and held-out validation separately. 
 - `test_results_<checkpoint>.csv`: evaluation results;
 - TensorBoard logs when `tensorboardX` is installed.
 

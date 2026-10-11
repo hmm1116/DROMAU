@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--isic_image_path", type=str, default=None)
     parser.add_argument("--isic_split_path", type=str, default="./data/isic/split")
     parser.add_argument("--sd198_image_path", type=str, default=None)
-    parser.add_argument("--sd198_split_path", type=str, default=None)
+    parser.add_argument("--sd198_split_path", type=str, default="./data/SD198/split")
     parser.add_argument("--rfmid_image_path", type=str, default=None)
     parser.add_argument("--rfmid_split_path", type=str, default="./data/RFMiD/split")
     parser.add_argument("--medical_vit_dir", type=str, default=None)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     trainset = Dataset("train", args)
     train_sampler = CategoriesSampler(
-        trainset.label, sampler_batch, args.way, args.shot + args.query
+        trainset.label, sampler_batch, args.way, args.shot + args.query, args.query
     )
     train_loader = DataLoader(
         dataset=trainset,
@@ -178,15 +178,29 @@ if __name__ == "__main__":
     )
 
     # Meta episodes form an independently sampled stream from the training split.
+    meta_sampler = CategoriesSampler(
+        trainset.label, 50, args.way, args.shot + args.query, args.query
+    )
+    meta_loader = DataLoader(
+        dataset=trainset,
+        batch_sampler=meta_sampler,
+        num_workers=args.num_workers,
+        pin_memory=True,
+    )
+
+    valset = Dataset("val", args)
     val_sampler = CategoriesSampler(
-        trainset.label, 50, args.validation_way, args.shot + args.query
+        valset.label, 50, args.validation_way, args.shot + args.query, args.query
     )
     val_loader = DataLoader(
-        dataset=trainset,
+        dataset=valset,
         batch_sampler=val_sampler,
         num_workers=args.num_workers,
         pin_memory=True,
     )
+    print("train: {} images, {} classes; val: {} images, {} classes".format(
+        len(trainset), trainset.num_class, len(valset), valset.num_class,
+    ))
 
     model = ProtoNet(args)
     feature_dims = {
@@ -267,6 +281,15 @@ if __name__ == "__main__":
             }
         else:
             payload = {"params": model.state_dict()}
+        payload.update({
+            "mlp_params": mlp.state_dict(),
+            "args": vars(args),
+            "epoch": epoch,
+            "val_acc": va0,
+            "val_acc_original": va0,
+            "val_acc_epsilon": va1,
+            "selection_metric": "val_acc_original",
+        })
         torch.save(payload, osp.join(args.save_path, name + ".pth"))
 
     trlog = {}
@@ -276,6 +299,9 @@ if __name__ == "__main__":
     trlog["train_acc"] = []
     trlog["train_acc_meta"] = []
     trlog["val_acc"] = []
+    trlog["val_acc_original"] = []
+    trlog["val_acc_epsilon"] = []
+    trlog["selection_metric"] = "val_acc_original"
     trlog["max_acc"] = 0.0
     trlog["max_acc_epoch"] = 0
 
@@ -283,10 +309,16 @@ if __name__ == "__main__":
     global_count = 0
     writer = SummaryWriter(comment=args.save_path)
     path = args.save_path + '/' + 'epsilons' + '.csv'
+    with open(path, 'w', newline='', encoding='utf-8') as csvFile:
+        csv.writer(csvFile).writerow([
+            'epoch', 'train_epsilon_mean', 'train_epsilon_min', 'train_epsilon_max',
+            'val_epsilon_mean', 'val_epsilon_min', 'val_epsilon_max',
+        ])
     max_epochs = 0
-    train_meta_loader_iter = iter(val_loader)
+    train_meta_loader_iter = iter(meta_loader)
 
     for epoch in range(1, args.max_epoch + 1):
+        mlp.train()
         tl = Averager()
         ta0 = Averager()
         ta1 = Averager()
@@ -294,6 +326,9 @@ if __name__ == "__main__":
         vl = Averager()
         va0 = Averager()
         va1 = Averager()
+        epsilons_train = Averager()
+        epsilon_train_min = float('inf')
+        epsilon_train_max = float('-inf')
         for i, batch in enumerate(train_loader, 1):
             data, _ = [_.cuda() for _ in batch]
             p = args.shot * args.way
@@ -357,14 +392,14 @@ if __name__ == "__main__":
                 meta_model.update_params(lr_inner=args.lr, source_params=grads)
             del grads
 
-            p = args.shot * args.validation_way
-            label_shot_meta = torch.arange(args.validation_way).repeat(args.shot).type(torch.cuda.LongTensor)
-            label_query_meta = torch.arange(args.validation_way).repeat(args.query).type(torch.cuda.LongTensor)
+            p = args.shot * args.way
+            label_shot_meta = torch.arange(args.way).repeat(args.shot).type(torch.cuda.LongTensor)
+            label_query_meta = torch.arange(args.way).repeat(args.query).type(torch.cuda.LongTensor)
             centroid_classes_meta = torch.unique(label_shot_meta)
             try:
                 data_meta, _ = next(train_meta_loader_iter)
             except StopIteration:
-                train_meta_loader_iter = iter(val_loader)
+                train_meta_loader_iter = iter(meta_loader)
                 data_meta, _ = next(train_meta_loader_iter)
             data_meta = data_meta.cuda()
             data_shot_meta, data_query_meta = data_meta[:p], data_meta[p:]
@@ -417,11 +452,15 @@ if __name__ == "__main__":
                 support_data = torch.cat([t.view(-1) for t in support_data], dim=0).view(args.way, -1)
             else:
                 support_data = torch.cat(support_data, dim=0)
-            with torch.no_grad():
-                epsilons = mlp(support_data).squeeze()
-                epsilons0 = torch.ones(args.way).cuda()
-                epsilons0 = epsilons0 * args.epsilons_ratio
-                epsilons = epsilons + epsilons0
+            # Freeze MR-Net weights while retaining gradients through its inputs.
+            mlp.requires_grad_(False)
+            epsilons = mlp(support_data).squeeze()
+            epsilons0 = torch.ones(args.way).cuda()
+            epsilons0 = epsilons0 * args.epsilons_ratio
+            epsilons = epsilons + epsilons0
+            epsilons_train.add(epsilons.mean().item())
+            epsilon_train_min = min(epsilon_train_min, epsilons.min().item())
+            epsilon_train_max = max(epsilon_train_max, epsilons.max().item())
 
             logits_label1, logits_label2, logits_ori = \
                 logits_label(feature_query, train_prototypes, label_query, centroid_classes, epsilons, args.way)
@@ -440,14 +479,18 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
+            mlp.requires_grad_(True)
 
         model.eval()
+        mlp.eval()
         print(
             "best epoch {}, best val acc={:.4f}".format(
                 trlog["max_acc_epoch"], trlog["max_acc"]
             )
         )
         epsilons_val = Averager()
+        epsilon_val_min = float('inf')
+        epsilon_val_max = float('-inf')
         with torch.no_grad():
             for i, batch in enumerate(val_loader, 1):
                 data, _ = [_.cuda() for _ in batch]
@@ -465,14 +508,16 @@ if __name__ == "__main__":
                 else:
                     support_data = torch.cat(support_data, dim=0)
                 epsilons = mlp(support_data).squeeze()
-                epsilons_val.add(epsilons.mean().item())
                 epsilons0 = torch.ones(args.validation_way).cuda()
                 epsilons0 = epsilons0 * args.epsilons_ratio
                 epsilons = epsilons + epsilons0
+                epsilons_val.add(epsilons.mean().item())
+                epsilon_val_min = min(epsilon_val_min, epsilons.min().item())
+                epsilon_val_max = max(epsilon_val_max, epsilons.max().item())
                 logits_label1, logits_label2, logits_ori = \
                     logits_label(feature_query, train_prototypes, label_query, centroid_classes, epsilons, args.validation_way)
 
-                loss = F.cross_entropy(logits_ori, label_query)
+                loss = F.cross_entropy(logits_label1, label_query)
 
                 acc1 = count_acc(logits_label1, label_query)
                 acc2 = count_acc(logits_label2, label_query)
@@ -489,18 +534,27 @@ if __name__ == "__main__":
         vl = vl.item()
         va0 = va0.item()
         va1 = va1.item()
+        epsilons_train = epsilons_train.item()
         epsilons_val = epsilons_val.item()
         writer.add_scalar("data/val_loss", float(vl), epoch)
         writer.add_scalar("data/val_acc0", float(va0), epoch)
         writer.add_scalar("data/val_acc1", float(va1), epoch)
         print("epoch {}, train, loss={:.4f} acc0={:.4f} acc1={:.4f} acc_meta={:.4f}".format(epoch, tl, ta0, ta1, tam))
         print("epoch {}, val, loss={:.4f} acc0={:.4f} acc1={:.4f}".format(epoch, vl, va0, va1))
-        print("epsilon_mean:", epsilons_val)
+        print("train epsilon: mean={} min={} max={}".format(
+            epsilons_train, epsilon_train_min, epsilon_train_max,
+        ))
+        print("val epsilon: mean={} min={} max={}".format(
+            epsilons_val, epsilon_val_min, epsilon_val_max,
+        ))
         with open(path, 'a', newline='', encoding='utf-8') as csvFile:
             writer_epsilons = csv.writer(csvFile)
-            writer_epsilons.writerow([epsilons_val])
+            writer_epsilons.writerow([
+                epoch, epsilons_train, epsilon_train_min, epsilon_train_max,
+                epsilons_val, epsilon_val_min, epsilon_val_max,
+            ])
 
-        if va0 > trlog["max_acc"]:
+        if epoch == 1 or va0 > trlog["max_acc"]:
             max_epochs = int(epoch)
             trlog["max_acc"] = va0
             trlog["max_acc_epoch"] = epoch
@@ -511,6 +565,8 @@ if __name__ == "__main__":
         trlog["train_acc_meta"].append(tam)
         trlog["val_loss"].append(vl)
         trlog["val_acc"].append(va0)
+        trlog["val_acc_original"].append(va0)
+        trlog["val_acc_epsilon"].append(va1)
 
         torch.save(trlog, osp.join(args.save_path, "trlog"))
         save_model("epoch-last")

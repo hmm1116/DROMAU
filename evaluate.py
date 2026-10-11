@@ -35,7 +35,7 @@ def build_parser():
         "--dataset", type=str, default="ISIC", choices=["ISIC", "SD198", "RFMiD"]
     )
     parser.add_argument("--save_path", type=str, required=True)
-    parser.add_argument("--checkpoint", type=str, default="epoch-last.pth")
+    parser.add_argument("--checkpoint", type=str, default="max_acc.pth")
     parser.add_argument("--hyperbolic", action="store_true", default=False)
     parser.add_argument("--c", type=float, default=None)
     parser.add_argument("--dim", type=int, default=64)
@@ -51,7 +51,7 @@ def build_parser():
     parser.add_argument("--isic_image_path", type=str, default=None)
     parser.add_argument("--isic_split_path", type=str, default="./data/isic/split")
     parser.add_argument("--sd198_image_path", type=str, default=None)
-    parser.add_argument("--sd198_split_path", type=str, default=None)
+    parser.add_argument("--sd198_split_path", type=str, default="./data/SD198/split")
     parser.add_argument("--rfmid_image_path", type=str, default=None)
     parser.add_argument("--rfmid_split_path", type=str, default="./data/RFMiD/split")
     parser.add_argument("--medical_vit_dir", type=str, default=None)
@@ -133,7 +133,7 @@ def evaluate(args):
     test_set = Dataset("test", args)
     test_way = args.validation_way
     sampler = CategoriesSampler(
-        test_set.label, args.test_episodes, test_way, args.shot + args.query
+        test_set.label, args.test_episodes, test_way, args.shot + args.query, args.query
     )
     loader = DataLoader(
         test_set, batch_sampler=sampler, num_workers=args.num_workers, pin_memory=True

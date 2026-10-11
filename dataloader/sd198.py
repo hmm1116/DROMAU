@@ -56,6 +56,7 @@ class SD198(Dataset):
                 transforms.RandomCrop(input_size, padding=4),
                 transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
                 transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
                 transforms.RandomRotation(180),
                 transforms.ToTensor(),
                 transforms.Normalize(normalize_mean, normalize_std)
