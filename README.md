@@ -64,8 +64,7 @@ A CUDA-capable GPU is required by the current training and evaluation code.
 
 ## Data preparation
 
-The repository does not redistribute medical images. Follow
-[`data/README.md`](data/README.md), then set the corresponding image root:
+The repository does not redistribute medical images. Set the corresponding image root:
 
 ```bash
 export ISIC_IMAGE_PATH=/path/to/ISIC_2019_Training_Input
