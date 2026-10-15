@@ -52,7 +52,7 @@ def build_parser():
     parser.add_argument("--test_episodes", type=int, default=2000)
     parser.add_argument("--num_workers", type=int, default=8)
     parser.add_argument("--isic_image_path", type=str, default=None)
-    parser.add_argument("--isic_split_path", type=str, default="./data/isic/split")
+    parser.add_argument("--isic_split_path", type=str, default="./data/ISIC/split")
     parser.add_argument("--sd198_image_path", type=str, default=None)
     parser.add_argument("--sd198_split_path", type=str, default="./data/SD198/split")
     parser.add_argument("--rfmid_image_path", type=str, default=None)

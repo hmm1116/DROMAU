@@ -72,21 +72,10 @@ export SD198_IMAGE_PATH=/path/to/SD-198/images
 export RFMID_IMAGE_PATH=/path/to/RFMiD
 ```
 
-The RFMiD split files use the columns `source,image,label`, with full class
-names matching the manuscript and response. The official abbreviations,
-full names, base/novel partition, and per-split counts are listed in
-[`data/RFMiD/class_names.csv`](data/RFMiD/class_names.csv). In particular,
-`MH` means Media Haze, while `MHL` means Macular Hole, following the
-[official RFMiD dataset description](https://doi.org/10.3390/data6020014).
-The split sizes are 985 training, 247 validation, and 212 test images.
-
 ## Training and evaluation
 
 For each configuration, the presets train five independent models and evaluate
 each model's `max_acc.pth` with five evaluation seeds (2,000 episodes per seed).
-The training and evaluation seed lists are both `1 42 332 1116 1999` by default
-and are set explicitly in each preset. The same evaluation seeds are reused
-across training runs to keep the evaluation episode sampling reproducible.
 The documented options below can be overridden through environment variables.
 
 ```bash
@@ -103,11 +92,8 @@ GPU=0 RFMID_IMAGE_PATH=/path/to/rfmid bash scripts/rfmid_5shot.sh
 ### Random seeds
 
 `TRAIN_SEEDS` controls independent model training. `TEST_SEEDS` controls repeated
-evaluation of each trained model; it does not create additional training runs.
-Both lists are space-separated. A nonzero seed fixes Python, NumPy, and PyTorch
-random states. `0` intentionally leaves them unfixed and is not a fixed seed of
-zero. Fixed seeds do not guarantee identical results across different hardware
-or software environments.
+evaluation of each trained model. Both lists are space-separated. A nonzero seed
+fixes Python, NumPy, and PyTorch random states; `0` leaves them unfixed.
 
 ```bash
 # One fixed training run, followed by the default five evaluations
@@ -119,8 +105,7 @@ TRAIN_SEEDS="0" GPU=0 RFMID_IMAGE_PATH=/path/to/rfmid \
 bash scripts/rfmid_5shot.sh
 ```
 
-Retain the five evaluation seeds for the manuscript's five-training-run by
-five-evaluation protocol. `run_experiment.py` handles one training run at a time;
+`run_experiment.py` handles one training run at a time;
 the shell launcher supplies each training seed through `--seed` and the
 evaluation list through `--test_seeds`. Default checkpoint directory names
 contain the training seed. With an explicit `SAVE_PATH` and multiple training
@@ -182,7 +167,7 @@ and one `row_type=mean` row averaging its five evaluations. The summary file
 contains one such mean row per training run. Main-table means and population
 standard deviations are calculated across these five training-run means.
 The `acc_ci` and `auc_ci` fields are episode-level 95% CI half-widths for one
-evaluation, not the across-training-run SD or a paired-difference CI.
+evaluation.
 
 
 ## Citation

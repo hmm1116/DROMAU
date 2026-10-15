@@ -8,7 +8,7 @@ from torchvision import transforms
 from torchvision.transforms import InterpolationMode
 
 
-SPLIT_PATH = "./data/isic/split"
+SPLIT_PATH = "./data/ISIC/split"
 
 
 def loadtest(csv_path):

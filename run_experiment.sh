@@ -40,7 +40,7 @@ case "$DATASET" in
     WAY=${WAY:-3}
     VALIDATION_WAY=${VALIDATION_WAY:-2}
     : "${ISIC_IMAGE_PATH:?Set ISIC_IMAGE_PATH to the ISIC image directory}"
-    ISIC_SPLIT_PATH=${ISIC_SPLIT_PATH:-./data/isic/split}
+    ISIC_SPLIT_PATH=${ISIC_SPLIT_PATH:-./data/ISIC/split}
     DATA_ARGS=(--isic_image_path "$ISIC_IMAGE_PATH" --isic_split_path "$ISIC_SPLIT_PATH")
     ;;
   SD198)
