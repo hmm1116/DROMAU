@@ -1,248 +1,248 @@
 source,image,label
-session,43,Diabetic_Retinopathy
-session,71,Diabetic_Retinopathy
-session,97,Diabetic_Retinopathy
-session,219,Diabetic_Retinopathy
-session,252,Diabetic_Retinopathy
-session,253,Diabetic_Retinopathy
-session,277,Diabetic_Retinopathy
-session,280,Diabetic_Retinopathy
-session,367,Diabetic_Retinopathy
-session,463,Diabetic_Retinopathy
-session,523,Diabetic_Retinopathy
-session,539,Diabetic_Retinopathy
-session,586,Diabetic_Retinopathy
-session,596,Diabetic_Retinopathy
-session,759,Diabetic_Retinopathy
-session,934,Diabetic_Retinopathy
-session,938,Diabetic_Retinopathy
-session,949,Diabetic_Retinopathy
-session,950,Diabetic_Retinopathy
-session,1039,Diabetic_Retinopathy
-session,1066,Diabetic_Retinopathy
-session,1070,Diabetic_Retinopathy
-session,1146,Diabetic_Retinopathy
-session,1158,Diabetic_Retinopathy
-session,1165,Diabetic_Retinopathy
-session,1208,Diabetic_Retinopathy
-session,1232,Diabetic_Retinopathy
-session,1241,Diabetic_Retinopathy
-session,1247,Diabetic_Retinopathy
-session,1276,Diabetic_Retinopathy
-session,1277,Diabetic_Retinopathy
-session,1296,Diabetic_Retinopathy
-session,1322,Diabetic_Retinopathy
-session,1348,Diabetic_Retinopathy
-session,1349,Diabetic_Retinopathy
-session,1358,Diabetic_Retinopathy
-session,1377,Diabetic_Retinopathy
-session,1378,Diabetic_Retinopathy
-session,1409,Diabetic_Retinopathy
-session,1420,Diabetic_Retinopathy
-session,1533,Diabetic_Retinopathy
-session,1538,Diabetic_Retinopathy
-session,1612,Diabetic_Retinopathy
-session,1649,Diabetic_Retinopathy
-session,1660,Diabetic_Retinopathy
-session,1661,Diabetic_Retinopathy
-session,176,Macular_Hole
-session,177,Macular_Hole
-session,205,Macular_Hole
-session,235,Macular_Hole
-session,247,Macular_Hole
-session,273,Macular_Hole
-session,323,Macular_Hole
-session,355,Macular_Hole
-session,415,Macular_Hole
-session,416,Macular_Hole
-session,417,Macular_Hole
-session,453,Macular_Hole
-session,522,Macular_Hole
-session,528,Macular_Hole
-session,535,Macular_Hole
-session,597,Macular_Hole
-session,640,Macular_Hole
-session,821,Macular_Hole
-session,916,Macular_Hole
-session,955,Macular_Hole
-session,1076,Macular_Hole
-session,1111,Macular_Hole
-session,1292,Macular_Hole
-session,1507,Macular_Hole
-session,1531,Macular_Hole
-session,1576,Macular_Hole
-session,1577,Macular_Hole
-session,1632,Macular_Hole
-session,1640,Macular_Hole
-session,1652,Macular_Hole
-session,1683,Macular_Hole
-session,1789,Macular_Hole
-session,1799,Macular_Hole
-session,1836,Macular_Hole
-session,32,Optic_Disk_Cup
-session,382,Optic_Disk_Cup
-session,383,Optic_Disk_Cup
-session,662,Optic_Disk_Cup
-session,674,Optic_Disk_Cup
-session,787,Optic_Disk_Cup
-session,816,Optic_Disk_Cup
-session,817,Optic_Disk_Cup
-session,825,Optic_Disk_Cup
-session,1139,Optic_Disk_Cup
-session,1155,Optic_Disk_Cup
-session,1219,Optic_Disk_Cup
-session,1280,Optic_Disk_Cup
-session,1300,Optic_Disk_Cup
-session,1305,Optic_Disk_Cup
-session,1306,Optic_Disk_Cup
-session,1372,Optic_Disk_Cup
-session,1435,Optic_Disk_Cup
-session,1456,Optic_Disk_Cup
-session,1462,Optic_Disk_Cup
-session,1468,Optic_Disk_Cup
-session,1482,Optic_Disk_Cup
-session,1818,Optic_Disk_Cup
-session,1846,Optic_Disk_Cup
-session,1857,Optic_Disk_Cup
-session,13,Diabetic_Nephropathy
-session,14,Diabetic_Nephropathy
-session,132,Diabetic_Nephropathy
-session,181,Diabetic_Nephropathy
-session,429,Diabetic_Nephropathy
-session,508,Diabetic_Nephropathy
-session,574,Diabetic_Nephropathy
-session,581,Diabetic_Nephropathy
-session,835,Diabetic_Nephropathy
-session,841,Diabetic_Nephropathy
-session,988,Diabetic_Nephropathy
-session,1136,Diabetic_Nephropathy
-session,1286,Diabetic_Nephropathy
-session,1517,Diabetic_Nephropathy
-session,1584,Diabetic_Nephropathy
-session,1747,Diabetic_Nephropathy
-session,245,Branch_Retinal_Vein_Occlusion
-session,272,Branch_Retinal_Vein_Occlusion
-session,384,Branch_Retinal_Vein_Occlusion
-session,517,Branch_Retinal_Vein_Occlusion
-session,620,Branch_Retinal_Vein_Occlusion
-session,913,Branch_Retinal_Vein_Occlusion
-session,1047,Branch_Retinal_Vein_Occlusion
-session,1243,Branch_Retinal_Vein_Occlusion
-session,1289,Branch_Retinal_Vein_Occlusion
-session,1432,Branch_Retinal_Vein_Occlusion
-session,1489,Branch_Retinal_Vein_Occlusion
-session,1908,Branch_Retinal_Vein_Occlusion
-session,56,Optic_Disk_Edema
-session,200,Optic_Disk_Edema
-session,376,Optic_Disk_Edema
-session,447,Optic_Disk_Edema
-session,576,Optic_Disk_Edema
-session,665,Optic_Disk_Edema
-session,702,Optic_Disk_Edema
-session,957,Optic_Disk_Edema
-session,991,Optic_Disk_Edema
-session,1205,Optic_Disk_Edema
-session,1291,Optic_Disk_Edema
-session,1343,Optic_Disk_Edema
-session,1423,Optic_Disk_Edema
-session,157,Myasthenia_Gravis
-session,161,Myasthenia_Gravis
-session,393,Myasthenia_Gravis
-session,751,Myasthenia_Gravis
-session,773,Myasthenia_Gravis
-session,1103,Myasthenia_Gravis
-session,1121,Myasthenia_Gravis
-session,1421,Myasthenia_Gravis
-session,1441,Myasthenia_Gravis
-session,1445,Myasthenia_Gravis
-session,1500,Myasthenia_Gravis
-session,1501,Myasthenia_Gravis
-session,1712,Myasthenia_Gravis
-session,400,Retinal_Scar
-session,518,Retinal_Scar
-session,753,Retinal_Scar
-session,884,Retinal_Scar
-session,1006,Retinal_Scar
-session,204,Age_related_Macular_Degeneration
-session,1191,Age_related_Macular_Degeneration
-session,1230,Age_related_Macular_Degeneration
-session,1344,Age_related_Macular_Degeneration
-session,1540,Age_related_Macular_Degeneration
-session,1552,Age_related_Macular_Degeneration
-session,1581,Age_related_Macular_Degeneration
-session,1592,Age_related_Macular_Degeneration
-session,1599,Age_related_Macular_Degeneration
-session,172,Central_Serous_Retinopathy
-session,611,Central_Serous_Retinopathy
-session,764,Central_Serous_Retinopathy
-session,945,Central_Serous_Retinopathy
-session,970,Central_Serous_Retinopathy
-session,612,Central_Retinal_Vein_Occlusion
-session,838,Central_Retinal_Vein_Occlusion
-session,864,Central_Retinal_Vein_Occlusion
-session,891,Central_Retinal_Vein_Occlusion
-session,1152,Central_Retinal_Vein_Occlusion
-session,1266,Central_Retinal_Vein_Occlusion
-test,86,Diabetic_Retinopathy
-test,124,Diabetic_Retinopathy
-test,128,Diabetic_Retinopathy
-test,141,Diabetic_Retinopathy
-test,167,Diabetic_Retinopathy
-test,193,Diabetic_Retinopathy
-test,194,Diabetic_Retinopathy
-test,222,Diabetic_Retinopathy
-test,247,Diabetic_Retinopathy
-test,255,Diabetic_Retinopathy
-test,271,Diabetic_Retinopathy
-test,350,Diabetic_Retinopathy
-test,356,Diabetic_Retinopathy
-test,410,Diabetic_Retinopathy
-test,423,Diabetic_Retinopathy
-test,432,Diabetic_Retinopathy
-test,472,Diabetic_Retinopathy
-test,480,Diabetic_Retinopathy
-test,68,Macular_Hole
-test,75,Macular_Hole
-test,186,Macular_Hole
-test,216,Macular_Hole
-test,232,Macular_Hole
-test,233,Macular_Hole
-test,251,Macular_Hole
-test,252,Macular_Hole
-test,263,Macular_Hole
-test,264,Macular_Hole
-test,336,Macular_Hole
-test,353,Macular_Hole
-test,370,Macular_Hole
-test,428,Macular_Hole
-test,511,Macular_Hole
-test,596,Macular_Hole
-test,597,Macular_Hole
-test,60,Optic_Disk_Cup
-test,573,Optic_Disk_Cup
-test,600,Optic_Disk_Cup
-test,198,Diabetic_Nephropathy
-test,204,Diabetic_Nephropathy
-test,219,Diabetic_Nephropathy
-test,315,Diabetic_Nephropathy
-test,381,Diabetic_Nephropathy
-test,396,Diabetic_Nephropathy
-test,422,Diabetic_Nephropathy
-test,512,Diabetic_Nephropathy
-test,134,Branch_Retinal_Vein_Occlusion
-test,237,Branch_Retinal_Vein_Occlusion
-test,364,Branch_Retinal_Vein_Occlusion
-test,71,Optic_Disk_Edema
-test,94,Retinal_Scar
-test,118,Retinal_Scar
-test,170,Retinal_Scar
-test,375,Retinal_Scar
-test,376,Retinal_Scar
-test,377,Retinal_Scar
-test,152,Age_related_Macular_Degeneration
-test,514,Age_related_Macular_Degeneration
-test,54,Central_Serous_Retinopathy
-test,92,Central_Serous_Retinopathy
-test,246,Central_Serous_Retinopathy
-test,412,Central_Serous_Retinopathy
-test,235,Central_Retinal_Vein_Occlusion
+session,43,Diabetic Retinopathy
+session,71,Diabetic Retinopathy
+session,97,Diabetic Retinopathy
+session,219,Diabetic Retinopathy
+session,252,Diabetic Retinopathy
+session,253,Diabetic Retinopathy
+session,277,Diabetic Retinopathy
+session,280,Diabetic Retinopathy
+session,367,Diabetic Retinopathy
+session,463,Diabetic Retinopathy
+session,523,Diabetic Retinopathy
+session,539,Diabetic Retinopathy
+session,586,Diabetic Retinopathy
+session,596,Diabetic Retinopathy
+session,759,Diabetic Retinopathy
+session,934,Diabetic Retinopathy
+session,938,Diabetic Retinopathy
+session,949,Diabetic Retinopathy
+session,950,Diabetic Retinopathy
+session,1039,Diabetic Retinopathy
+session,1066,Diabetic Retinopathy
+session,1070,Diabetic Retinopathy
+session,1146,Diabetic Retinopathy
+session,1158,Diabetic Retinopathy
+session,1165,Diabetic Retinopathy
+session,1208,Diabetic Retinopathy
+session,1232,Diabetic Retinopathy
+session,1241,Diabetic Retinopathy
+session,1247,Diabetic Retinopathy
+session,1276,Diabetic Retinopathy
+session,1277,Diabetic Retinopathy
+session,1296,Diabetic Retinopathy
+session,1322,Diabetic Retinopathy
+session,1348,Diabetic Retinopathy
+session,1349,Diabetic Retinopathy
+session,1358,Diabetic Retinopathy
+session,1377,Diabetic Retinopathy
+session,1378,Diabetic Retinopathy
+session,1409,Diabetic Retinopathy
+session,1420,Diabetic Retinopathy
+session,1533,Diabetic Retinopathy
+session,1538,Diabetic Retinopathy
+session,1612,Diabetic Retinopathy
+session,1649,Diabetic Retinopathy
+session,1660,Diabetic Retinopathy
+session,1661,Diabetic Retinopathy
+session,176,Media Haze
+session,177,Media Haze
+session,205,Media Haze
+session,235,Media Haze
+session,247,Media Haze
+session,273,Media Haze
+session,323,Media Haze
+session,355,Media Haze
+session,415,Media Haze
+session,416,Media Haze
+session,417,Media Haze
+session,453,Media Haze
+session,522,Media Haze
+session,528,Media Haze
+session,535,Media Haze
+session,597,Media Haze
+session,640,Media Haze
+session,821,Media Haze
+session,916,Media Haze
+session,955,Media Haze
+session,1076,Media Haze
+session,1111,Media Haze
+session,1292,Media Haze
+session,1507,Media Haze
+session,1531,Media Haze
+session,1576,Media Haze
+session,1577,Media Haze
+session,1632,Media Haze
+session,1640,Media Haze
+session,1652,Media Haze
+session,1683,Media Haze
+session,1789,Media Haze
+session,1799,Media Haze
+session,1836,Media Haze
+session,32,Optic Disc Cupping
+session,382,Optic Disc Cupping
+session,383,Optic Disc Cupping
+session,662,Optic Disc Cupping
+session,674,Optic Disc Cupping
+session,787,Optic Disc Cupping
+session,816,Optic Disc Cupping
+session,817,Optic Disc Cupping
+session,825,Optic Disc Cupping
+session,1139,Optic Disc Cupping
+session,1155,Optic Disc Cupping
+session,1219,Optic Disc Cupping
+session,1280,Optic Disc Cupping
+session,1300,Optic Disc Cupping
+session,1305,Optic Disc Cupping
+session,1306,Optic Disc Cupping
+session,1372,Optic Disc Cupping
+session,1435,Optic Disc Cupping
+session,1456,Optic Disc Cupping
+session,1462,Optic Disc Cupping
+session,1468,Optic Disc Cupping
+session,1482,Optic Disc Cupping
+session,1818,Optic Disc Cupping
+session,1846,Optic Disc Cupping
+session,1857,Optic Disc Cupping
+session,13,Drusen
+session,14,Drusen
+session,132,Drusen
+session,181,Drusen
+session,429,Drusen
+session,508,Drusen
+session,574,Drusen
+session,581,Drusen
+session,835,Drusen
+session,841,Drusen
+session,988,Drusen
+session,1136,Drusen
+session,1286,Drusen
+session,1517,Drusen
+session,1584,Drusen
+session,1747,Drusen
+session,245,Branch Retinal Vein Occlusion
+session,272,Branch Retinal Vein Occlusion
+session,384,Branch Retinal Vein Occlusion
+session,517,Branch Retinal Vein Occlusion
+session,620,Branch Retinal Vein Occlusion
+session,913,Branch Retinal Vein Occlusion
+session,1047,Branch Retinal Vein Occlusion
+session,1243,Branch Retinal Vein Occlusion
+session,1289,Branch Retinal Vein Occlusion
+session,1432,Branch Retinal Vein Occlusion
+session,1489,Branch Retinal Vein Occlusion
+session,1908,Branch Retinal Vein Occlusion
+session,56,Optic Disc Edema
+session,200,Optic Disc Edema
+session,376,Optic Disc Edema
+session,447,Optic Disc Edema
+session,576,Optic Disc Edema
+session,665,Optic Disc Edema
+session,702,Optic Disc Edema
+session,957,Optic Disc Edema
+session,991,Optic Disc Edema
+session,1205,Optic Disc Edema
+session,1291,Optic Disc Edema
+session,1343,Optic Disc Edema
+session,1423,Optic Disc Edema
+session,157,Myopia
+session,161,Myopia
+session,393,Myopia
+session,751,Myopia
+session,773,Myopia
+session,1103,Myopia
+session,1121,Myopia
+session,1421,Myopia
+session,1441,Myopia
+session,1445,Myopia
+session,1500,Myopia
+session,1501,Myopia
+session,1712,Myopia
+session,400,Retinitis
+session,518,Retinitis
+session,753,Retinitis
+session,884,Retinitis
+session,1006,Retinitis
+session,204,Age-Related Macular Degeneration
+session,1191,Age-Related Macular Degeneration
+session,1230,Age-Related Macular Degeneration
+session,1344,Age-Related Macular Degeneration
+session,1540,Age-Related Macular Degeneration
+session,1552,Age-Related Macular Degeneration
+session,1581,Age-Related Macular Degeneration
+session,1592,Age-Related Macular Degeneration
+session,1599,Age-Related Macular Degeneration
+session,172,Central Serous Retinopathy
+session,611,Central Serous Retinopathy
+session,764,Central Serous Retinopathy
+session,945,Central Serous Retinopathy
+session,970,Central Serous Retinopathy
+session,612,Central Retinal Vein Occlusion
+session,838,Central Retinal Vein Occlusion
+session,864,Central Retinal Vein Occlusion
+session,891,Central Retinal Vein Occlusion
+session,1152,Central Retinal Vein Occlusion
+session,1266,Central Retinal Vein Occlusion
+test,86,Diabetic Retinopathy
+test,124,Diabetic Retinopathy
+test,128,Diabetic Retinopathy
+test,141,Diabetic Retinopathy
+test,167,Diabetic Retinopathy
+test,193,Diabetic Retinopathy
+test,194,Diabetic Retinopathy
+test,222,Diabetic Retinopathy
+test,247,Diabetic Retinopathy
+test,255,Diabetic Retinopathy
+test,271,Diabetic Retinopathy
+test,350,Diabetic Retinopathy
+test,356,Diabetic Retinopathy
+test,410,Diabetic Retinopathy
+test,423,Diabetic Retinopathy
+test,432,Diabetic Retinopathy
+test,472,Diabetic Retinopathy
+test,480,Diabetic Retinopathy
+test,68,Media Haze
+test,75,Media Haze
+test,186,Media Haze
+test,216,Media Haze
+test,232,Media Haze
+test,233,Media Haze
+test,251,Media Haze
+test,252,Media Haze
+test,263,Media Haze
+test,264,Media Haze
+test,336,Media Haze
+test,353,Media Haze
+test,370,Media Haze
+test,428,Media Haze
+test,511,Media Haze
+test,596,Media Haze
+test,597,Media Haze
+test,60,Optic Disc Cupping
+test,573,Optic Disc Cupping
+test,600,Optic Disc Cupping
+test,198,Drusen
+test,204,Drusen
+test,219,Drusen
+test,315,Drusen
+test,381,Drusen
+test,396,Drusen
+test,422,Drusen
+test,512,Drusen
+test,134,Branch Retinal Vein Occlusion
+test,237,Branch Retinal Vein Occlusion
+test,364,Branch Retinal Vein Occlusion
+test,71,Optic Disc Edema
+test,94,Retinitis
+test,118,Retinitis
+test,170,Retinitis
+test,375,Retinitis
+test,376,Retinitis
+test,377,Retinitis
+test,152,Age-Related Macular Degeneration
+test,514,Age-Related Macular Degeneration
+test,54,Central Serous Retinopathy
+test,92,Central Serous Retinopathy
+test,246,Central Serous Retinopathy
+test,412,Central Serous Retinopathy
+test,235,Central Retinal Vein Occlusion

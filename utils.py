@@ -14,11 +14,12 @@ def set_gpu(args):
 
 
 def set_random_seed(seed):
+    """Use 0 for an unfixed run and a nonzero value for a fixed seed."""
     if seed == 0:
-        logging.info(' random seed')
+        logging.info('random seed: unfixed (seed=0)')
         torch.backends.cudnn.benchmark = True
     else:
-        logging.info('manual seed:', seed)
+        logging.info('manual seed: %s', seed)
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)

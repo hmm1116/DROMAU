@@ -30,8 +30,14 @@ def build_parser():
     parser.add_argument("--train_x", action="store_true", default=False)
     parser.add_argument("--not-riemannian", action="store_true")
     parser.add_argument("--sampler_batch", type=int, default=200)
-    parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--test_seeds", type=str, default="0")
+    parser.add_argument(
+        "--seed", type=int, default=0,
+        help="Training seed; 0 leaves the random states unfixed."
+    )
+    parser.add_argument(
+        "--test_seeds", type=str, default="1 42 332 1116 1999",
+        help="Evaluation seeds; each nonzero seed fixes episodic sampling, while 0 is unfixed."
+    )
     parser.add_argument("--test_episodes", type=int, default=2000)
     parser.add_argument("--num_workers", type=int, default=8)
     parser.add_argument("--checkpoint", type=str, default="max_acc.pth")

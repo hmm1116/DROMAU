@@ -12,6 +12,8 @@ GPU=${GPU:-0}
 MAX_EPOCH=${MAX_EPOCH:-200}
 SAMPLER_BATCH=${SAMPLER_BATCH:-200}
 MODEL_LIST=${MODEL_LIST:-resnet12}
+TRAIN_SEEDS=${TRAIN_SEEDS:-"1 42 332 1116 1999"}
+TEST_SEEDS=${TEST_SEEDS:-"1 42 332 1116 1999"}
 LR_LIST=${LR_LIST:-5e-4}
 MLP_LR_LIST=${MLP_LR_LIST:-1e-2}
 C_LIST=${C_LIST:-}
@@ -64,31 +66,44 @@ esac
 FLAGS=()
 FLAGS+=(--hyperbolic --not-riemannian)
 [[ "$SKIP_TRAIN" == "1" ]] && FLAGS+=(--skip_train)
-[[ -n "$SAVE_PATH" ]] && FLAGS+=(--save_path "$SAVE_PATH")
+read -r -a TRAIN_SEED_LIST <<< "$TRAIN_SEEDS"
 
 for MODEL in $MODEL_LIST; do
   for LR in $LR_LIST; do
     for MLP_LR in $MLP_LR_LIST; do
       for C in $C_LIST; do
-        CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON" run_experiment.py \
-          --dataset "$DATASET" \
-          --gpu 0 \
-          --max_epoch "$MAX_EPOCH" \
-          --sampler_batch "$SAMPLER_BATCH" \
-          --query "$QUERY" \
-          --way "$WAY" \
-          --validation_way "$VALIDATION_WAY" \
-          --shot "$SHOT" \
-          --lr "$LR" \
-          --mlp_lr "$MLP_LR" \
-          --model "$MODEL" \
-          --c "$C" \
-          --test_episodes "$TEST_EPISODES" \
-          --checkpoint "$CHECKPOINT" \
-          --results_csv "$RESULTS_CSV" \
-          --summary_csv "$SUMMARY_CSV" \
-          "${DATA_ARGS[@]}" \
-          "${FLAGS[@]}"
+        for TRAIN_SEED in "${TRAIN_SEED_LIST[@]}"; do
+          RUN_FLAGS=("${FLAGS[@]}")
+          if [[ -n "$SAVE_PATH" ]]; then
+            RUN_SAVE_PATH="$SAVE_PATH"
+            if [[ ${#TRAIN_SEED_LIST[@]} -gt 1 ]]; then
+              RUN_SAVE_PATH="${SAVE_PATH%/}/seed${TRAIN_SEED}"
+              [[ "$SKIP_TRAIN" == "1" ]] || mkdir -p "$SAVE_PATH"
+            fi
+            RUN_FLAGS+=(--save_path "$RUN_SAVE_PATH")
+          fi
+          CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON" run_experiment.py \
+            --dataset "$DATASET" \
+            --gpu 0 \
+            --max_epoch "$MAX_EPOCH" \
+            --sampler_batch "$SAMPLER_BATCH" \
+            --query "$QUERY" \
+            --way "$WAY" \
+            --validation_way "$VALIDATION_WAY" \
+            --shot "$SHOT" \
+            --lr "$LR" \
+            --mlp_lr "$MLP_LR" \
+            --model "$MODEL" \
+            --c "$C" \
+            --seed "$TRAIN_SEED" \
+            --test_seeds "$TEST_SEEDS" \
+            --test_episodes "$TEST_EPISODES" \
+            --checkpoint "$CHECKPOINT" \
+            --results_csv "$RESULTS_CSV" \
+            --summary_csv "$SUMMARY_CSV" \
+            "${DATA_ARGS[@]}" \
+            "${RUN_FLAGS[@]}"
+        done
       done
     done
   done

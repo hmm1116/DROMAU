@@ -3,5 +3,7 @@ set -euo pipefail
 export DATASET=RFMiD
 export SHOT=${SHOT:-1}
 export QUERY=${QUERY:-1}
+export TRAIN_SEEDS=${TRAIN_SEEDS:-"1 42 332 1116 1999"}
+export TEST_SEEDS=${TEST_SEEDS:-"1 42 332 1116 1999"}
 export C_LIST=${C_LIST:-1e-3}
 exec bash "$(dirname "${BASH_SOURCE[0]}")/../run_experiment.sh"

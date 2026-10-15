@@ -86,7 +86,10 @@ if __name__ == "__main__":
     parser.add_argument("--not-riemannian", action="store_true")
     parser.add_argument("--sampler_batch", type=int, default=200)
     parser.add_argument("--num_workers", type=int, default=8)
-    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument(
+        "--seed", type=int, default=None,
+        help="Nonzero values fix the random seed; 0 or omission leaves it unfixed."
+    )
     parser.add_argument("--epsilons_ratio", type=float, default=0.0)
     parser.add_argument("--isic_image_path", type=str, default=None)
     parser.add_argument("--isic_split_path", type=str, default="./data/isic/split")
